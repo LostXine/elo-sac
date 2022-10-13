@@ -34,14 +34,16 @@ To start the parameter search on clients, run `bash search.sh`.
 The client will connect to the HTTP server and request the hyper-parameters for training.
 When the training completes, the client will report the evaluation results to the server and requests a new task.
 
-Run `bash check_status.sh` or `bash check_full_status.sh` to check the search status.
+Run `bash check_status.sh` or `bash full_status.sh` to check the search status.
 
 To stop the search, **stop** the current server and **restart** the search server with `--stop True`.
 All the clients will stop searching after finishing the current search.
 
 To evaluate the optimal combination, run `bash eval-s09.sh` and it will start to train ELo-SAC agents in 6 DMControl environments with 10 random seeds.
 
-Check `train.py` for hyper-parameters during the training. The optimal parameters reported in the paper is stored at `server/top8.json`.
+You can find all hyper-parameters during the training in `train.py`.
+
+The optimal loss combination (and augmentation) reported in the paper is stored at `server/top8.json`, and we also provide other loss combinations that work well during the search (see `server/top[1-20].json`).
 
 ## Contact
 
