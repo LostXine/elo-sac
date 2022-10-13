@@ -7,32 +7,24 @@ import numpy as np
 import traceback
 
 
-with open('search-server-ip', 'r') as f:
-    url = f.read().strip()
-p_data = None
-
 if __name__ == '__main__':
     torch.multiprocessing.set_start_method('spawn')
-    while True:
-        try:
-            r = requests.get(url + 'get_eval')
-            if r.status_code == 200:
-                break
-            time.sleep(10)
-        except ConnectionRefusedError:
-            print("Connection Refused Error, retry in 10s.")
 
-    p_data = json.loads(r.text)
-    print(p_data)
+    for i in range(1, 21):
+        js_file = f'server/top{i}.json'
+        print(js_file)
+        with open(js_file, 'r') as f:
+            p_data = json.load(f)
+        print(p_data)
 
-    data = p_data['data']
-    aug = data[0]
-    rl_aug = data[1]
-    weights = data[2:]
-    print(f"Aug: {aug} | RL_Aug: {rl_aug} | Weights: ", weights)
+        data = p_data['data']
+        aug = data[0]
+        rl_aug = data[1]
+        weights = data[2:]
+        print(f"Aug: {aug} | RL_Aug: {rl_aug} | Weights: ", weights)
 
-    main(weights, aug=aug, rl_aug=rl_aug, task_str=r.text)
+        main(weights, aug=aug, rl_aug=rl_aug, task_str=json.dumps(p_data), tid=i)
 
-    print("Done")
+        print(f"{js_file} done!")
 
 

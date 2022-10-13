@@ -43,8 +43,8 @@ def parse_args():
     # critic
     parser.add_argument('--critic_lr', default=1e-3, type=float)
     parser.add_argument('--critic_beta', default=0.9, type=float)
-    parser.add_argument('--critic_tau', default=0.01, type=float) 
-    parser.add_argument('--critic_target_update_freq', default=2, type=int) 
+    parser.add_argument('--critic_tau', default=0.01, type=float)
+    parser.add_argument('--critic_target_update_freq', default=2, type=int)
     parser.add_argument('--cpc_update_freq', default=1, type=int)
     # actor
     parser.add_argument('--actor_lr', default=1e-3, type=float)
@@ -152,8 +152,18 @@ def make_agent(obs_shape, action_shape, args, device, weights):
     else:
         assert 'agent is not supported: %s' % args.agent
 
-def main(weights, tid=0, aug=None, rl_aug=None, seed=None, task_str=None):
+def main(weights, domain=None, task=None, action_repeat=None, tid=0, aug=None, rl_aug=None, seed=None, task_str=None):
     args = parse_args()
+
+    if domain is not None:
+        args.domain_name = domain
+
+    if task is not None:
+        args.task_name = task
+
+    if action_repeat is not None:
+        args.num_train_steps = args.num_train_steps * args.action_repeat // action_repeat
+        args.action_repeat = action_repeat
 
     if seed is not None:
         args.seed = seed
@@ -163,6 +173,9 @@ def main(weights, tid=0, aug=None, rl_aug=None, seed=None, task_str=None):
 
     if rl_aug is not None:
         args.rl_pre_image_size = int(rl_aug)
+
+    # if args.task_name in ['hop', 'hard']:
+    #    return 0
 
     replay_buffer_image_size = max(args.pre_image_size, args.rl_pre_image_size)
 
@@ -183,6 +196,7 @@ def main(weights, tid=0, aug=None, rl_aug=None, seed=None, task_str=None):
         width=args.pre_transform_image_size,
         frame_skip=args.action_repeat
     )
+
     print('Env shape:', env.reset().shape)
     env.seed(args.seed)
     # ref: https://harald.co/2019/07/30/reproducibility-issues-using-openai-gym/
@@ -197,11 +211,11 @@ def main(weights, tid=0, aug=None, rl_aug=None, seed=None, task_str=None):
     # ts = time.strftime("%m_%d", ts)
     env_name = f'{args.domain_name}-{args.task_name}'
 
-    process_title = 'ELo-SAC-Gen2'
+    process_title = 'ELo-SAC-Gen3'
 
     setproctitle.setproctitle(f"python {process_title}-{env_name}-{tid}-s{args.seed}")
-    
-    
+
+
     weights_str = '_'.join([f"{w:.2f}" for w in weights])
 
     # exp_name = f'{env_name}-{ts}-im-{args.image_size:d}-b{args.batch_size}-s{args.seed}'
@@ -252,7 +266,7 @@ def main(weights, tid=0, aug=None, rl_aug=None, seed=None, task_str=None):
 
     # convert log-scale weights
     weights = [ 10 ** i if i > -4 else 0 for i in weights]
-    
+
     agent = make_agent(
         obs_shape=obs_shape,
         action_shape=action_shape,
@@ -268,7 +282,7 @@ def main(weights, tid=0, aug=None, rl_aug=None, seed=None, task_str=None):
 
     for step in range(args.num_train_steps):
         # evaluate agent periodically
-        
+
         if step % args.eval_freq == 0 and step > 0:
             L.log('eval/episode', episode, step)
             evaluate(env, agent, video, args.num_eval_episodes, L, step,args)
@@ -276,7 +290,7 @@ def main(weights, tid=0, aug=None, rl_aug=None, seed=None, task_str=None):
                 agent.save(model_dir, step)
             if args.save_buffer:
                 replay_buffer.save(buffer_dir)
-        
+
         if done:
             if step > 0:
                 if step % args.log_interval == 0:
@@ -314,7 +328,7 @@ def main(weights, tid=0, aug=None, rl_aug=None, seed=None, task_str=None):
             done
         )
         episode_reward += reward
-        
+
         # print('obs shape:', obs.shape)
         replay_buffer.add(obs, action, reward, next_obs, done_bool)
 

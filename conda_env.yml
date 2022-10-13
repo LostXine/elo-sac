@@ -14,9 +14,10 @@ dependencies:
   - pip:
     - numpy
     - termcolor
-    - git+https://github.com/deepmind/dm_control.git
+    - gym==0.25.1
+    - dm_control
     - git+https://github.com/1nadequacy/dmc2gym.git
-    - tensorboard
+    - tb-nightly
     - imageio
     - imageio-ffmpeg
     - scikit-image

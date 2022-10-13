@@ -1,2 +1,2 @@
 #!/bin/bash
-python3 search-server.py --port 61888 --timeout 24
+python3 server.py --port 61887 --timeout 24
