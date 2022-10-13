@@ -1,0 +1,10 @@
+#!/bin/bash
+if (( $# < 1 )); then
+    >&2 echo "Please specify GPU ID"
+    exit 1
+fi
+
+echo "Use GPU: $1"
+
+EGL_DEVICE_ID=$1 CUDA_VISIBLE_DEVICES=$1 python3 search-client.py  --domain_name cheetah  --task_name run --num_train_steps 25000 --pre_transform_image_size 116 --work_dir ./save_search --batch_size 128 --save_model
+

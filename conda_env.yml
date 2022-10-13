@@ -1,0 +1,24 @@
+name: elo-sac
+channels:
+  - pytorch
+  - defaults
+dependencies:
+  - python
+  - pytorch
+  - torchvision
+  - cudatoolkit=11.3
+  - absl-py
+  - pyparsing
+  - pillow
+  - pip
+  - pip:
+    - numpy
+    - termcolor
+    - git+https://github.com/deepmind/dm_control.git
+    - git+https://github.com/1nadequacy/dmc2gym.git
+    - tensorboard
+    - imageio
+    - imageio-ffmpeg
+    - scikit-image
+    - setproctitle
+    - scipy
